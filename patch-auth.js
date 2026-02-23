@@ -114,9 +114,9 @@ if (code.includes(oldInit)) {
 } else { console.log('5. skip - initial screen'); }
 
 // 6. Add saveProfile call on activation
-const oldActivate = 'setSc(S.ACTIVATING)';
-const newActivate = 'saveProfile();setSc(S.ACTIVATING)';
-if (code.includes(oldActivate) && !code.includes('saveProfile();setSc(S.ACTIVATING)')) {
+const oldActivate = '()=>setSc(S.ACTIVATING)';
+const newActivate = '()=>{saveProfile();setSc(S.ACTIVATING)}';
+if (code.includes(oldActivate) && !code.includes('saveProfile()')) {
   code = code.replace(oldActivate, newActivate);
   changes++; console.log('6. Added saveProfile on activation');
 } else { console.log('6. skip - saveProfile'); }

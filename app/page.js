@@ -856,7 +856,7 @@ export default function Home() {
             </div>
           </div>
           <div className="f5" style={{paddingTop:24}}>
-            <button className="ba" onClick={()=>saveProfile();setSc(S.ACTIVATING)}>🌙 &nbsp; Begin Night {nn} with Luna →</button>
+            <button className="ba" onClick={()=>{saveProfile();setSc(S.ACTIVATING)}}>🌙 &nbsp; Begin Night {nn} with Luna →</button>
             <button className="bg" style={{width:"100%",textAlign:"center",marginTop:12}} onClick={()=>setSc(S.HOME)}>Not tonight — go to home</button>
           </div>
         </div>
