@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from "react";
+import { supabase } from '../lib/supabase';
 
 function CrescentMoon({ size = 48, glow = true, animate = false }) {
   return (
@@ -30,7 +31,7 @@ function CrescentMoon({ size = 48, glow = true, animate = false }) {
   );
 }
 
-const S = { SPLASH:"splash", ON1:"on1", ON2:"on2", ON3:"on3", BABY:"baby", PED:"ped", INTAKE:"intake", DIAG:"diag", METHOD:"method", BRIEF:"brief", PRELAUNCH:"prelaunch", ACTIVATING:"activating", NIGHT:"night", NIGHTSUMMARY:"nightsummary", HOME:"home", NAP:"nap", CHAT:"chat", PLAN:"plan", LOG:"log" };
+const S = { SPLASH:"splash", ON1:"on1", ON2:"on2", ON3:"on3", BABY:"baby", PED:"ped", INTAKE:"intake", DIAG:"diag", METHOD:"method", BRIEF:"brief", PRELAUNCH:"prelaunch", ACTIVATING:"activating", NIGHT:"night", NIGHTSUMMARY:"nightsummary", HOME:"home", NAP:"nap", CHAT:"chat", PLAN:"plan", LOG:"log", AUTH:"auth" };
 
 const WW = {
   4:{naps:4,window:"1h–1h15m",night:"10–11h"}, 5:{naps:3,window:"1h15m–1h45m",night:"10–11h"},
@@ -149,7 +150,7 @@ export default function Home() {
   const saved=()=>{try{return JSON.parse(localStorage.getItem("dw_v4")||"null");}catch{return null;}};
   const sv=saved();
 
-  const[sc,setSc]=useState(S.SPLASH);
+  const[sc,setSc]=useState(null);
   const[name,setName]=useState(sv?.name||"");
   const[age,setAge]=useState(sv?.age||6);
   const[ped,setPed]=useState(null);
@@ -171,6 +172,13 @@ export default function Home() {
   const[showM,setShowM]=useState(false);
   const[wt,setWt]=useState(sv?.wt||"07:00");
   const[rating,setRating]=useState(null);
+  const[user,setUser]=useState(null);
+  const[authLoading,setAuthLoading]=useState(true);
+  const[authMode,setAuthMode]=useState("login");
+  const[authEmail,setAuthEmail]=useState("");
+  const[authPw,setAuthPw]=useState("");
+  const[authError,setAuthError]=useState("");
+  const[authSubmitting,setAuthSubmitting]=useState(false);
   const[wups,setWups]=useState(null);
   const[gbed,setGbed]=useState(sv?.gbed||"19:30");
   const[editBed,setEditBed]=useState(false);
@@ -210,6 +218,68 @@ export default function Home() {
     },4800);
     return()=>{ts.forEach(clearTimeout);clearTimeout(done);};
   },[sc]);
+
+  // Auth: check session on mount
+  useEffect(()=>{
+    supabase.auth.getSession().then(({data:{session}})=>{
+      setUser(session?.user||null);
+      if(session?.user){
+        supabase.from('profiles').select('*').eq('id',session.user.id).single().then(({data})=>{
+          if(data&&data.baby_name){
+            setName(data.baby_name);
+            if(data.baby_age)setAge(Number(data.baby_age));
+            if(data.sleep_method)setMethod(data.sleep_method);
+            if(data.night_number)setNn(data.night_number);
+            setSc(S.HOME);
+          }else{setSc(S.SPLASH);}
+          setAuthLoading(false);
+        });
+      }else{setAuthLoading(false);setSc(S.AUTH);}
+    });
+    const{data:{subscription}}=supabase.auth.onAuthStateChange((_,session)=>{
+      setUser(session?.user||null);
+    });
+    return()=>subscription.unsubscribe();
+  },[]);
+
+  const handleAuth=async()=>{
+    setAuthError("");setAuthSubmitting(true);
+    try{
+      if(authMode==="signup"){
+        const{error}=await supabase.auth.signUp({email:authEmail,password:authPw});
+        if(error)throw error;
+        const{data:{session}}=await supabase.auth.getSession();
+        if(session){setUser(session.user);setSc(S.SPLASH);}
+        else{setAuthError("Check your email to confirm your account!");setAuthSubmitting(false);return;}
+      }else{
+        const{data,error}=await supabase.auth.signInWithPassword({email:authEmail,password:authPw});
+        if(error)throw error;
+        setUser(data.user);
+        const{data:profile}=await supabase.from('profiles').select('*').eq('id',data.user.id).single();
+        if(profile&&profile.baby_name){
+          setName(profile.baby_name);setAge(Number(profile.baby_age));
+          setMethod(profile.sleep_method);setNn(profile.night_number||1);
+          setSc(S.HOME);
+        }else{setSc(S.SPLASH);}
+      }
+    }catch(e){setAuthError(e.message);}
+    setAuthSubmitting(false);
+  };
+
+  const handleSignOut=async()=>{
+    await supabase.auth.signOut();
+    setUser(null);setSc(S.AUTH);
+    setName("");setAge(6);setMethod(null);setNn(1);
+    setDmsgs([]);setNmsgs([]);setNapmsg([]);
+  };
+
+  const saveProfile=async()=>{
+    if(!user)return;
+    await supabase.from('profiles').upsert({
+      id:user.id,baby_name:name,baby_age:String(age),
+      sleep_method:method,night_number:nn
+    });
+  };
 
   const ww=WW[Math.min(Math.max(age,4),12)];
   const mo=METHODS.find(m=>m.id===method);
@@ -309,6 +379,10 @@ export default function Home() {
     </div>
   );
 
+  const ProfileBtn=()=>user?(
+    <button onClick={handleSignOut} style={{position:"fixed",top:12,right:12,zIndex:200,width:36,height:36,borderRadius:"50%",background:"rgba(201,169,110,0.15)",border:"1px solid rgba(201,169,110,0.2)",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",color:"#C9A96E",fontSize:14,fontFamily:"'DM Sans',sans-serif"}} title="Sign out">{authEmail?authEmail[0].toUpperCase():"U"}</button>
+  ):null;
+
   const CSS=`
     @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=DM+Sans:wght@300;400;500&display=swap');
     *{margin:0;padding:0;box-sizing:border-box}body{background:#0a0d12}::-webkit-scrollbar{width:0}
@@ -367,14 +441,31 @@ export default function Home() {
 
   return (
     <div style={WRAP}>
-      <style>{CSS}</style>
+      <style>{CSS}</style><ProfileBtn/>
 
       {sc!==S.ACTIVATING&&sc!==S.NIGHT&&sc!==S.NAP&&[...Array(20)].map((_,i)=>(
         <div key={i} className="str" style={{width:Math.random()>.7?3:2,height:Math.random()>.7?3:2,left:`${Math.random()*100}%`,top:`${Math.random()*100}%`,opacity:Math.random()*.4+.2,animation:`starFloat ${3+Math.random()*4}s ${Math.random()*4}s ease-in-out infinite`}} />
       ))}
 
       {/* SPLASH */}
-      {sc===S.SPLASH&&(
+      {authLoading&&<div style={{minHeight:"100vh",display:"flex",alignItems:"center",justifyContent:"center",background:"#0D1117"}}><CrescentMoon size={64} glow animate/></div>}
+    {sc===S.AUTH&&<div style={{minHeight:"100vh",background:"linear-gradient(135deg,#0D1117,#1a1f2e)",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:20,fontFamily:"'DM Sans',sans-serif"}}>
+      <div style={{width:"100%",maxWidth:360,textAlign:"center"}}>
+        <CrescentMoon size={80} glow animate/>
+        <h1 style={{fontFamily:"'Cormorant Garamond',serif",fontSize:42,color:"#EDE8DF",fontWeight:300,margin:"24px 0 4px",letterSpacing:1}}>Dreamwell</h1>
+        <p style={{color:"#C9A96E",fontSize:14,marginBottom:40,letterSpacing:0.5}}>Your 24/7 Baby Sleep Coach</p>
+        <div style={{display:"flex",background:"rgba(255,255,255,0.06)",borderRadius:12,padding:3,marginBottom:28}}>
+          <button onClick={()=>{setAuthMode("login");setAuthError("");}} style={{flex:1,padding:"10px 0",borderRadius:10,border:"none",cursor:"pointer",fontFamily:"'DM Sans',sans-serif",fontSize:14,fontWeight:500,background:authMode==="login"?"rgba(201,169,110,0.2)":"transparent",color:authMode==="login"?"#C9A96E":"#8a8070",transition:"all .2s"}}>Sign In</button>
+          <button onClick={()=>{setAuthMode("signup");setAuthError("");}} style={{flex:1,padding:"10px 0",borderRadius:10,border:"none",cursor:"pointer",fontFamily:"'DM Sans',sans-serif",fontSize:14,fontWeight:500,background:authMode==="signup"?"rgba(201,169,110,0.2)":"transparent",color:authMode==="signup"?"#C9A96E":"#8a8070",transition:"all .2s"}}>Create Account</button>
+        </div>
+        <input type="email" placeholder="Email" value={authEmail} onChange={e=>setAuthEmail(e.target.value)} style={{width:"100%",padding:"14px 16px",marginBottom:12,borderRadius:12,border:"1px solid rgba(201,169,110,0.2)",background:"rgba(255,255,255,0.04)",color:"#EDE8DF",fontSize:15,fontFamily:"'DM Sans',sans-serif",outline:"none",boxSizing:"border-box"}}/>
+        <input type="password" placeholder="Password" value={authPw} onChange={e=>setAuthPw(e.target.value)} onKeyDown={e=>e.key==="Enter"&&handleAuth()} style={{width:"100%",padding:"14px 16px",marginBottom:8,borderRadius:12,border:"1px solid rgba(201,169,110,0.2)",background:"rgba(255,255,255,0.04)",color:"#EDE8DF",fontSize:15,fontFamily:"'DM Sans',sans-serif",outline:"none",boxSizing:"border-box"}}/>
+        {authError&&<p style={{color:authError.includes("Check your email")?"#C9A96E":"#e87c7c",fontSize:13,margin:"8px 0",lineHeight:1.4}}>{authError}</p>}
+        <button onClick={handleAuth} disabled={authSubmitting||!authEmail||!authPw} style={{width:"100%",padding:"15px 0",marginTop:16,borderRadius:12,border:"none",cursor:authSubmitting?"not-allowed":"pointer",background:authSubmitting?"rgba(201,169,110,0.3)":"linear-gradient(135deg,#C9A96E,#E8C98A)",color:"#0D1117",fontSize:16,fontWeight:600,fontFamily:"'DM Sans',sans-serif",letterSpacing:0.5,transition:"all .2s"}}>{authSubmitting?"...":(authMode==="signup"?"Create Account":"Sign In")}</button>
+        {authMode==="signup"&&<p style={{color:"#8a8070",fontSize:12,marginTop:16,lineHeight:1.5}}>Password must be at least 6 characters</p>}
+      </div>
+    </div>}
+    {sc===S.SPLASH&&(
         <div style={{minHeight:"100vh",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",background:"radial-gradient(ellipse at center,#1a1a2e 0%,#0D1117 70%)",animation:"fadeIn .8s ease"}}>
           <CrescentMoon size={110} glow animate />
           <div style={{textAlign:"center",marginTop:24}}>
@@ -765,7 +856,7 @@ export default function Home() {
             </div>
           </div>
           <div className="f5" style={{paddingTop:24}}>
-            <button className="ba" onClick={()=>setSc(S.ACTIVATING)}>🌙 &nbsp; Begin Night {nn} with Luna →</button>
+            <button className="ba" onClick={()=>saveProfile();setSc(S.ACTIVATING)}>🌙 &nbsp; Begin Night {nn} with Luna →</button>
             <button className="bg" style={{width:"100%",textAlign:"center",marginTop:12}} onClick={()=>setSc(S.HOME)}>Not tonight — go to home</button>
           </div>
         </div>
