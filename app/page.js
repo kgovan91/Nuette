@@ -241,6 +241,13 @@ export default function Home() {
     return()=>subscription.unsubscribe();
   },[]);
 
+  // Auto-save profile when onboarding completes
+  useEffect(()=>{
+    if(user&&name&&method&&(sc===S.ACTIVATING||sc===S.HOME||sc===S.NIGHT)){
+      supabase.from("profiles").upsert({id:user.id,baby_name:name,baby_age:String(age),sleep_method:method,night_number:nn}).then(r=>console.log("Profile saved",r));
+    }
+  },[sc]);
+
   // Auth guard: always redirect to login if not authenticated
   useEffect(()=>{
     if(!authLoading&&!user&&sc!==S.AUTH)setSc(S.AUTH);
