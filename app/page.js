@@ -191,13 +191,12 @@ export default function Home() {
   const dref=useRef(),nref=useRef(),napref=useRef();
 
   useEffect(()=>{
-    const s=saved();
+    if(sc!==S.SPLASH)return;
     const t=setTimeout(()=>{
-      if(s?.name&&s?.method){setSc(S.HOME);}
-      else{setSc(S.ON1);}
+      setSc(S.ON1);
     },2400);
     return()=>clearTimeout(t);
-  },[]);
+  },[sc]);
 
   // Save to localStorage whenever key data changes
   useEffect(()=>{
