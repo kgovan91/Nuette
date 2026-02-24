@@ -233,14 +233,19 @@ export default function Home() {
             setSc(S.HOME);
           }else{setSc(S.SPLASH);}
           setAuthLoading(false);
-        });
+        }).catch(()=>{setSc(S.SPLASH);setAuthLoading(false);});
       }else{setAuthLoading(false);setSc(S.AUTH);}
-    });
+    }).catch(()=>{setAuthLoading(false);setSc(S.AUTH);});
     const{data:{subscription}}=supabase.auth.onAuthStateChange((_,session)=>{
       setUser(session?.user||null);
     });
     return()=>subscription.unsubscribe();
   },[]);
+
+  // Auth guard: always redirect to login if not authenticated
+  useEffect(()=>{
+    if(!authLoading&&!user&&sc!==S.AUTH)setSc(S.AUTH);
+  },[authLoading,user,sc]);
 
   const handleAuth=async()=>{
     setAuthError("");setAuthSubmitting(true);
@@ -465,7 +470,7 @@ export default function Home() {
         {authMode==="signup"&&<p style={{color:"#8a8070",fontSize:12,marginTop:16,lineHeight:1.5}}>Password must be at least 6 characters</p>}
       </div>
     </div>}
-    {sc===S.SPLASH&&(
+    {!authLoading&&sc===S.SPLASH&&(
         <div style={{minHeight:"100vh",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",background:"radial-gradient(ellipse at center,#1a1a2e 0%,#0D1117 70%)",animation:"fadeIn .8s ease"}}>
           <CrescentMoon size={110} glow animate />
           <div style={{textAlign:"center",marginTop:24}}>
