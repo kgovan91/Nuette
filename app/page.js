@@ -188,6 +188,7 @@ export default function Home() {
   const[modal,setModal]=useState(null);
   const[resetConfirm,setResetConfirm]=useState(false);
   const[changingMethod,setChangingMethod]=useState(false);
+  const[showSignOut,setShowSignOut]=useState(false);
   const dref=useRef(),nref=useRef(),napref=useRef();
 
   useEffect(()=>{
@@ -391,7 +392,22 @@ export default function Home() {
   );
 
   const ProfileBtn=()=>user&&(sc===S.HOME||sc===S.CHAT||sc===S.NAP||sc===S.PLAN||sc===S.LOG||sc===S.NIGHT)?(
-    <button onClick={handleSignOut} style={{position:"fixed",top:12,right:12,zIndex:200,width:36,height:36,borderRadius:"50%",background:"rgba(201,169,110,0.15)",border:"1px solid rgba(201,169,110,0.2)",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",color:"#C9A96E",fontSize:14,fontFamily:"'DM Sans',sans-serif"}} title="Sign out">{user.email?user.email[0].toUpperCase():"U"}</button>
+    <>
+      <button onClick={()=>setShowSignOut(true)} style={{position:"fixed",top:12,right:12,zIndex:200,width:36,height:36,borderRadius:"50%",background:"rgba(201,169,110,0.15)",border:"1px solid rgba(201,169,110,0.2)",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",color:"#C9A96E",fontSize:14,fontFamily:"'DM Sans',sans-serif"}} title="Sign out">{user.email?user.email[0].toUpperCase():"U"}</button>
+      {showSignOut&&(
+        <div onClick={()=>setShowSignOut(false)} style={{position:"fixed",top:0,left:0,right:0,bottom:0,background:"rgba(0,0,0,0.6)",backdropFilter:"blur(6px)",zIndex:300,display:"flex",alignItems:"center",justifyContent:"center"}}>
+          <div onClick={e=>e.stopPropagation()} style={{background:isDayMode?"#F5EFE4":"#161B22",border:isDayMode?"1px solid rgba(201,169,110,0.3)":"1px solid rgba(201,169,110,0.15)",borderRadius:20,padding:"28px 24px",width:"85%",maxWidth:320,textAlign:"center"}}>
+            <div style={{fontSize:36,marginBottom:12}}>🌙</div>
+            <h3 style={{fontFamily:"'Cormorant Garamond',serif",fontSize:22,fontWeight:300,color:isDayMode?"#2C2010":"#EDE8DF",marginBottom:8}}>Sign out?</h3>
+            <p style={{fontSize:13,color:isDayMode?"#6B6560":"#6B6560",lineHeight:1.6,marginBottom:24}}>Are you sure you want to sign out of Dreamwell?</p>
+            <div style={{display:"flex",gap:10}}>
+              <button onClick={()=>setShowSignOut(false)} style={{flex:1,padding:"12px 0",borderRadius:12,background:"none",border:isDayMode?"1px solid rgba(201,169,110,0.3)":"1px solid rgba(255,255,255,0.1)",color:isDayMode?"#2C2010":"#EDE8DF",fontSize:14,fontFamily:"'DM Sans',sans-serif",cursor:"pointer",fontWeight:500}}>Cancel</button>
+              <button onClick={()=>{setShowSignOut(false);handleSignOut();}} style={{flex:1,padding:"12px 0",borderRadius:12,background:"rgba(201,169,110,0.15)",border:"1px solid rgba(201,169,110,0.3)",color:"#C9A96E",fontSize:14,fontFamily:"'DM Sans',sans-serif",cursor:"pointer",fontWeight:500}}>Sign Out</button>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   ):null;
 
   const CSS=`
