@@ -1004,9 +1004,12 @@ export default function Home() {
       {showM&&(
         <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.8)",backdropFilter:"blur(8px)",zIndex:200,display:"flex",alignItems:"flex-end",justifyContent:"center",animation:"fadeIn .3s ease"}}>
           <div style={{width:"100%",maxWidth:390,background:"#0D1117",borderRadius:"24px 24px 0 0",padding:"28px 24px 40px",border:"1px solid rgba(255,255,255,0.08)"}}>
-            <div style={{display:"flex",alignItems:"center",gap:12,marginBottom:24}}>
-              <CrescentMoon size={36} glow animate />
-              <div><div style={{fontSize:16,fontWeight:500,color:"#EDE8DF"}}>Good morning 🌅</div><div style={{fontSize:13,color:"#6B6560",marginTop:2}}>Let's build {name}'s day</div></div>
+            <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:24}}>
+              <div style={{display:"flex",alignItems:"center",gap:12}}>
+                <CrescentMoon size={36} glow animate />
+                <div><div style={{fontSize:16,fontWeight:500,color:"#EDE8DF"}}>Good morning 🌅</div><div style={{fontSize:13,color:"#6B6560",marginTop:2}}>Let's build {name}'s day</div></div>
+              </div>
+              <button onClick={()=>{setShowM(false);setMDone(true);}} style={{background:"none",border:"none",color:"#6B6560",fontSize:22,cursor:"pointer",padding:"4px 8px",fontFamily:"'DM Sans',sans-serif"}}>✕</button>
             </div>
             <div style={{marginBottom:20}}>
               <label style={{fontSize:12,color:"#6B6560",letterSpacing:1,textTransform:"uppercase",display:"block",marginBottom:10}}>What time did {name} wake up?</label>
