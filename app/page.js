@@ -220,6 +220,7 @@ export default function Home() {
 
   useEffect(()=>{
     if(sc!==S.ACTIVATING)return;
+    if(nmsgs.length>0){setSc(S.NIGHT);return;}
     setAs2(0);
     const ts=[600,1400,2400,3400].map((t,i)=>setTimeout(()=>setAs2(i+1),t));
     const done=setTimeout(()=>{
