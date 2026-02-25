@@ -343,40 +343,43 @@ export default function Home() {
 
   const openAddLog=()=>{setLmNight(String(nn>1?nn-1:1));setLmDate(new Date().toLocaleDateString());setLmRating(null);setLmWups(null);setLogModal({mode:"add"});};
   const openEditLog=(entry,i)=>{setLmNight(String(entry.night));setLmDate(entry.date);setLmRating(entry.rating);setLmWups(typeof entry.wakeups==="string"?(/\d/.test(entry.wakeups)?parseInt(entry.wakeups):entry.wakeups):entry.wakeups);setLogModal({mode:"edit",index:i,entry});};
-  const saveLogEntry=async()=>{
+  const saveLogEntry=()=>{
     if(!lmRating||lmWups===null||!logModal)return;
     const modal=logModal;
     setLogModal(null);
-    const entry={night:parseInt(lmNight),date:lmDate,rating:lmRating,wakeups:typeof lmWups==="number"?lmWups:lmWups};
+    const nightNum=parseInt(lmNight);
+    const entry={night:nightNum,date:lmDate,rating:lmRating,wakeups:typeof lmWups==="number"?lmWups:lmWups};
     if(modal.mode==="add"){
       setLog(prev=>{if(prev.find(e=>e.night===entry.night))return prev;return[...prev,entry].sort((a,b)=>a.night-b.night);});
-      if(user){supabase.from('sleep_logs').insert({user_id:user.id,night:entry.night,date:entry.date,rating:entry.rating,wakeups:String(entry.wakeups)}).catch(()=>{});}
+      if(nightNum>=nn){setNn(nightNum+1);if(user){supabase.from('profiles').upsert({id:user.id,baby_name:name,baby_age:String(age),sleep_method:method,night_number:nightNum+1}).then(r=>console.log("Profile updated",r));}}
+      if(user){supabase.from('sleep_logs').insert({user_id:user.id,night:entry.night,date:entry.date,rating:entry.rating,wakeups:String(entry.wakeups)}).then(r=>console.log("Sleep log saved",r)).catch(e=>console.error("Sleep log error",e));}
     }else{
       setLog(prev=>prev.map((e,i)=>i===modal.index?entry:e).sort((a,b)=>a.night-b.night));
-      if(user){supabase.from('sleep_logs').update({rating:entry.rating,wakeups:String(entry.wakeups)}).eq('user_id',user.id).eq('night',entry.night).catch(()=>{});}
+      if(user){supabase.from('sleep_logs').update({rating:entry.rating,wakeups:String(entry.wakeups)}).eq('user_id',user.id).eq('night',entry.night).then(r=>console.log("Sleep log updated",r)).catch(e=>console.error("Sleep log update error",e));}
     }
   };
 
-  const saveNapLog=async(napNum,startTime,endTime,dur)=>{
+  const saveNapLog=(napNum,startTime,endTime,dur)=>{
     const entry={date:new Date().toLocaleDateString(),nap_number:napNum,start_time:startTime,end_time:endTime,duration:dur};
     setNapLogs(prev=>[...prev,entry]);
-    if(user){await supabase.from('nap_logs').insert({user_id:user.id,date:entry.date,nap_number:napNum,start_time:startTime,end_time:endTime,duration:dur}).catch(e=>console.log("Nap log save error (table may not exist yet):",e));}
+    if(user){supabase.from('nap_logs').insert({user_id:user.id,date:entry.date,nap_number:napNum,start_time:startTime,end_time:endTime,duration:dur}).then(r=>console.log("Nap log saved",r)).catch(e=>console.error("Nap log error",e));}
   };
 
   const openEditNap=(nap,i)=>{setNeStart(nap.start_time);setNeEnd(nap.end_time);setNapEditModal({mode:"edit",index:i,nap});};
-  const saveNapEdit=async()=>{
+  const saveNapEdit=()=>{
     if(!neStart||!neEnd||!napEditModal)return;
     const modal=napEditModal;
     setNapEditModal(null);
     const dur=Math.max(t2m(neEnd)-t2m(neStart),0);
     if(modal.mode==="add"){
-      const entry={date:modal.nap.date,nap_number:modal.nap.nap_number,start_time:neStart,end_time:neEnd,duration:dur};
-      setNapLogs(prev=>[...prev,entry]);
-      if(user){supabase.from('nap_logs').insert({user_id:user.id,...entry}).catch(()=>{});}
+      const napNum=modal.nap.nap_number;
+      const napDate=modal.nap.date;
+      setNapLogs(prev=>[...prev,{date:napDate,nap_number:napNum,start_time:neStart,end_time:neEnd,duration:dur}]);
+      if(user){supabase.from('nap_logs').insert({user_id:user.id,date:napDate,nap_number:napNum,start_time:neStart,end_time:neEnd,duration:dur}).then(r=>console.log("Nap added",r)).catch(e=>console.error("Nap add error",e));}
     }else{
       const updated={...modal.nap,start_time:neStart,end_time:neEnd,duration:dur};
       setNapLogs(prev=>prev.map((n,i)=>i===modal.index?updated:n));
-      if(user){supabase.from('nap_logs').update({start_time:neStart,end_time:neEnd,duration:dur}).eq('user_id',user.id).eq('date',updated.date).eq('nap_number',updated.nap_number).catch(()=>{});}
+      if(user){supabase.from('nap_logs').update({start_time:neStart,end_time:neEnd,duration:dur}).eq('user_id',user.id).eq('date',updated.date).eq('nap_number',updated.nap_number).then(r=>console.log("Nap updated",r)).catch(e=>console.error("Nap update error",e));}
     }
   };
 
