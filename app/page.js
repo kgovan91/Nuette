@@ -31,7 +31,7 @@ function CrescentMoon({ size = 48, glow = true, animate = false }) {
   );
 }
 
-const S = { SPLASH:"splash", ON1:"on1", ON2:"on2", ON3:"on3", BABY:"baby", PED:"ped", INTAKE:"intake", DIAG:"diag", METHOD:"method", BRIEF:"brief", PRELAUNCH:"prelaunch", ACTIVATING:"activating", NIGHT:"night", NIGHTSUMMARY:"nightsummary", HOME:"home", NAP:"nap", CHAT:"chat", PLAN:"plan", LOG:"log", AUTH:"auth" };
+const S = { LANDING:"landing", SPLASH:"splash", ON1:"on1", ON2:"on2", ON3:"on3", BABY:"baby", PED:"ped", INTAKE:"intake", DIAG:"diag", METHOD:"method", BRIEF:"brief", PRELAUNCH:"prelaunch", ACTIVATING:"activating", NIGHT:"night", NIGHTSUMMARY:"nightsummary", HOME:"home", NAP:"nap", CHAT:"chat", PLAN:"plan", LOG:"log", AUTH:"auth" };
 
 const WW = {
   4:{naps:4,window:"1h–1h15m",night:"10–11h"}, 5:{naps:3,window:"1h15m–1h45m",night:"10–11h"},
@@ -189,7 +189,6 @@ export default function Home() {
   const[resetConfirm,setResetConfirm]=useState(false);
   const[changingMethod,setChangingMethod]=useState(false);
   const[showSignOut,setShowSignOut]=useState(false);
-  const[showProfileMenu,setShowProfileMenu]=useState(false);
   const[logModal,setLogModal]=useState(null);
   const[lmRating,setLmRating]=useState(null);
   const[lmWups,setLmWups]=useState(null);
@@ -253,8 +252,8 @@ export default function Home() {
           }else{setSc(S.SPLASH);}
           setAuthLoading(false);
         }).catch(()=>{setSc(S.SPLASH);setAuthLoading(false);});
-      }else{setAuthLoading(false);setSc(S.AUTH);}
-    }).catch(()=>{setAuthLoading(false);setSc(S.AUTH);});
+      }else{setAuthLoading(false);setSc(S.LANDING);}
+    }).catch(()=>{setAuthLoading(false);setSc(S.LANDING);});
     const{data:{subscription}}=supabase.auth.onAuthStateChange((_,session)=>{
       setUser(session?.user||null);
     });
@@ -270,7 +269,7 @@ export default function Home() {
 
   // Auth guard: always redirect to login if not authenticated
   useEffect(()=>{
-    if(!authLoading&&!user&&sc!==S.AUTH)setSc(S.AUTH);
+    if(!authLoading&&!user&&sc!==S.AUTH&&sc!==S.LANDING)setSc(S.LANDING);
   },[authLoading,user,sc]);
 
   const handleAuth=async()=>{
@@ -305,7 +304,7 @@ export default function Home() {
 
   const handleSignOut=async()=>{
     await supabase.auth.signOut();
-    setUser(null);setSc(S.AUTH);
+    setUser(null);setSc(S.LANDING);
     setName("");setAge(6);setMethod(null);setNn(1);
     setDmsgs([]);setNmsgs([]);setNapmsg([]);setLog([]);setNapLogs([]);
   };
@@ -497,25 +496,9 @@ export default function Home() {
     </div>
   );
 
-  const supportSubject=encodeURIComponent(`Nuette Support — ${name||"Baby"}, Night ${nn||1}`);
-  const supportEmail=`mailto:support@nuette.app?subject=${supportSubject}`;
-
   const ProfileBtn=()=>user&&(sc===S.HOME||sc===S.CHAT||sc===S.NAP||sc===S.PLAN||sc===S.LOG||sc===S.NIGHT)?(
     <>
-      <button onClick={()=>setShowProfileMenu(!showProfileMenu)} style={{position:"fixed",top:12,right:12,zIndex:200,width:36,height:36,borderRadius:"50%",background:"rgba(201,169,110,0.15)",border:"1px solid rgba(201,169,110,0.2)",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",color:"#C9A96E",fontSize:14,fontFamily:"'DM Sans',sans-serif"}} title="Menu">{user.email?user.email[0].toUpperCase():"U"}</button>
-      {showProfileMenu&&(
-        <div onClick={()=>setShowProfileMenu(false)} style={{position:"fixed",top:0,left:0,right:0,bottom:0,zIndex:250}}>
-          <div onClick={e=>e.stopPropagation()} style={{position:"fixed",top:56,right:12,zIndex:260,background:isDayMode?"#F5EFE4":"#1a1f2e",border:isDayMode?"1px solid rgba(201,169,110,0.3)":"1px solid rgba(201,169,110,0.15)",borderRadius:14,padding:"6px",minWidth:160,boxShadow:"0 8px 32px rgba(0,0,0,0.3)"}}>
-            <a href={supportEmail} onClick={()=>setShowProfileMenu(false)} style={{display:"flex",alignItems:"center",gap:10,padding:"12px 14px",borderRadius:10,textDecoration:"none",color:isDayMode?"#2C2010":"#EDE8DF",fontSize:14,fontFamily:"'DM Sans',sans-serif",fontWeight:400,cursor:"pointer",transition:"background .15s"}} onMouseEnter={e=>e.currentTarget.style.background=isDayMode?"rgba(201,169,110,0.1)":"rgba(255,255,255,0.05)"} onMouseLeave={e=>e.currentTarget.style.background="transparent"}>
-              <span style={{fontSize:16}}>✉</span> Support
-            </a>
-            <div style={{height:1,background:isDayMode?"rgba(201,169,110,0.15)":"rgba(255,255,255,0.06)",margin:"2px 10px"}}/>
-            <button onClick={()=>{setShowProfileMenu(false);setShowSignOut(true);}} style={{display:"flex",alignItems:"center",gap:10,padding:"12px 14px",borderRadius:10,background:"none",border:"none",color:isDayMode?"#2C2010":"#EDE8DF",fontSize:14,fontFamily:"'DM Sans',sans-serif",fontWeight:400,cursor:"pointer",width:"100%",transition:"background .15s"}} onMouseEnter={e=>e.currentTarget.style.background=isDayMode?"rgba(201,169,110,0.1)":"rgba(255,255,255,0.05)"} onMouseLeave={e=>e.currentTarget.style.background="transparent"}>
-              <span style={{fontSize:16}}>↩</span> Sign Out
-            </button>
-          </div>
-        </div>
-      )}
+      <button onClick={()=>setShowSignOut(true)} style={{position:"fixed",top:12,right:12,zIndex:200,width:36,height:36,borderRadius:"50%",background:"rgba(201,169,110,0.15)",border:"1px solid rgba(201,169,110,0.2)",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",color:"#C9A96E",fontSize:14,fontFamily:"'DM Sans',sans-serif"}} title="Sign out">{user.email?user.email[0].toUpperCase():"U"}</button>
       {showSignOut&&(
         <div onClick={()=>setShowSignOut(false)} style={{position:"fixed",top:0,left:0,right:0,bottom:0,background:"rgba(0,0,0,0.6)",backdropFilter:"blur(6px)",zIndex:300,display:"flex",alignItems:"center",justifyContent:"center"}}>
           <div onClick={e=>e.stopPropagation()} style={{background:isDayMode?"#F5EFE4":"#161B22",border:isDayMode?"1px solid rgba(201,169,110,0.3)":"1px solid rgba(201,169,110,0.15)",borderRadius:20,padding:"28px 24px",width:"85%",maxWidth:320,textAlign:"center"}}>
@@ -598,11 +581,125 @@ export default function Home() {
 
       {/* SPLASH */}
       {authLoading&&<div style={{minHeight:"100vh",display:"flex",alignItems:"center",justifyContent:"center",background:"#0D1117"}}><CrescentMoon size={64} glow animate/></div>}
+    {sc===S.LANDING&&<div style={{background:"#FAFAF8",color:"#2C2010",fontFamily:"'DM Sans',sans-serif",overflowX:"hidden"}}>
+      {/* HERO */}
+      <div style={{minHeight:"75vh",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",textAlign:"center",padding:"40px 24px",position:"relative",background:"radial-gradient(ellipse at 30% 30%, rgba(201,169,110,0.06) 0%, transparent 50%), #0D1117"}}>
+        <div style={{position:"absolute",top:0,left:0,right:0,height:"70%",backgroundImage:"radial-gradient(1px 1px at 10% 15%, rgba(255,255,255,0.35), transparent),radial-gradient(1px 1px at 25% 35%, rgba(255,255,255,0.2), transparent),radial-gradient(1.5px 1.5px at 45% 8%, rgba(255,255,255,0.4), transparent),radial-gradient(1px 1px at 65% 25%, rgba(255,255,255,0.15), transparent),radial-gradient(1px 1px at 80% 45%, rgba(255,255,255,0.25), transparent),radial-gradient(1px 1px at 35% 55%, rgba(255,255,255,0.15), transparent),radial-gradient(1.5px 1.5px at 90% 12%, rgba(201,169,110,0.5), transparent),radial-gradient(1px 1px at 55% 42%, rgba(255,255,255,0.2), transparent)"}}/>
+        <div style={{position:"relative",zIndex:1,maxWidth:560}}>
+          <div style={{width:90,height:90,margin:"0 auto 28px",animation:"float 6s ease-in-out infinite"}}>
+            <svg width="90" height="90" viewBox="0 0 120 120">
+              <defs>
+                <radialGradient id="lmg" cx="30%" cy="28%" r="70%"><stop offset="0%" stopColor="#FDF0D5"/><stop offset="100%" stopColor="#C9A96E"/></radialGradient>
+                <filter id="lglow"><feGaussianBlur stdDeviation="5" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+              </defs>
+              <circle cx="58" cy="62" r="38" fill="url(#lmg)" filter="url(#lglow)"/>
+              <circle cx="78" cy="48" r="32" fill="#0D1117"/>
+              <circle cx="88" cy="28" r="2" fill="#F5E6C8" opacity="0.7"/>
+              <circle cx="98" cy="38" r="1.2" fill="#F5E6C8" opacity="0.5"/>
+              <circle cx="92" cy="52" r="1" fill="#F5E6C8" opacity="0.4"/>
+            </svg>
+          </div>
+          <h1 className="landing-hero-title" style={{fontFamily:"'Cormorant Garamond',serif",fontSize:68,fontWeight:300,letterSpacing:4,marginBottom:6,color:"#EDE8DF"}}>Nuette</h1>
+          <p style={{fontSize:12,color:"rgba(237,232,223,0.3)",letterSpacing:2,marginBottom:14}}>( noo-ett )</p>
+          <p style={{fontFamily:"'Cormorant Garamond',serif",fontStyle:"italic",fontWeight:300,fontSize:22,color:"#E8C98A",letterSpacing:1,marginBottom:20}}>Your calm at 3am.</p>
+          <p style={{fontSize:15,color:"rgba(237,232,223,0.6)",lineHeight:1.7,marginBottom:40,maxWidth:400,marginLeft:"auto",marginRight:"auto"}}>Luna knows your baby, your method, and exactly what night you're on. She stays with you in real time — because no parent should sit alone on the hallway floor at 3am.</p>
+          <button onClick={()=>{setAuthMode("signup");setSc(S.AUTH);}} style={{display:"inline-block",padding:"16px 48px",background:"linear-gradient(135deg,#C9A96E,#E8C98A)",color:"#0D1117",border:"none",borderRadius:14,fontSize:16,fontWeight:600,fontFamily:"'DM Sans',sans-serif",letterSpacing:0.5,cursor:"pointer",boxShadow:"0 4px 24px rgba(201,169,110,0.3)",transition:"all 0.3s ease"}}>Meet Luna</button>
+        </div>
+        <div style={{position:"absolute",bottom:32,left:"50%",transform:"translateX(-50%)",color:"rgba(201,169,110,0.4)",fontSize:12,letterSpacing:3,textTransform:"uppercase",animation:"pulse 2s ease-in-out infinite"}}>Scroll</div>
+      </div>
+
+      {/* HOW IT WORKS */}
+      <div style={{padding:"100px 24px",background:"#FAFAF8",textAlign:"center"}}>
+        <p style={{fontSize:11,letterSpacing:5,textTransform:"uppercase",color:"#C9A96E",marginBottom:16}}>How it works</p>
+        <h2 style={{fontFamily:"'Cormorant Garamond',serif",fontSize:40,fontWeight:300,color:"#2C2010",marginBottom:60,letterSpacing:1}}>Three steps to peaceful nights</h2>
+        <div style={{display:"flex",gap:28,maxWidth:900,margin:"0 auto",flexWrap:"wrap",justifyContent:"center"}}>
+          {[
+            {icon:"👶",title:"Tell us about your baby",desc:"Name, age, and what sleep looks like now. Luna learns your family's unique situation."},
+            {icon:"🌙",title:"Choose your method",desc:"Ferber, Chair Method, Gentle — pick what feels right. Luna adapts her coaching to your approach."},
+            {icon:"💛",title:"Luna takes it from here",desc:"Bedtime. Naps. 3am wake-ups. Luna coaches you through all of it in real time — and tracks your baby's progress night after night."}
+          ].map((step,i)=>(
+            <div key={i} style={{flex:1,minWidth:240,maxWidth:280,padding:"40px 28px",background:"#fff",border:"1px solid rgba(201,169,110,0.15)",borderRadius:20,boxShadow:"0 2px 12px rgba(0,0,0,0.04)"}}>
+              <div style={{fontSize:32,marginBottom:16}}>{step.icon}</div>
+              <h3 style={{fontFamily:"'Cormorant Garamond',serif",fontSize:22,fontWeight:400,color:"#2C2010",marginBottom:10}}>{step.title}</h3>
+              <p style={{fontSize:14,color:"#8a8070",lineHeight:1.6}}>{step.desc}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* SCREENSHOTS */}
+      <div style={{padding:"100px 24px",background:"linear-gradient(180deg, #FAFAF8, #F0EBE0)",textAlign:"center",overflow:"hidden"}}>
+        <p style={{fontSize:11,letterSpacing:5,textTransform:"uppercase",color:"#C9A96E",marginBottom:16}}>The experience</p>
+        <h2 style={{fontFamily:"'Cormorant Garamond',serif",fontSize:40,fontWeight:300,color:"#2C2010",marginBottom:60,letterSpacing:1}}>Built for the hardest moments</h2>
+        <div style={{display:"flex",gap:28,justifyContent:"center",alignItems:"center",flexWrap:"wrap"}}>
+          {/* Day mode phone */}
+          <div style={{width:220,height:440,background:"#0D1117",borderRadius:28,border:"3px solid #2a2520",overflow:"hidden",position:"relative",boxShadow:"0 24px 60px rgba(0,0,0,0.2), 0 0 0 1px rgba(201,169,110,0.1)"}}>
+            <div style={{width:100,height:22,background:"#000",borderRadius:"0 0 14px 14px",margin:"0 auto",position:"relative",zIndex:2}}/>
+            <div style={{padding:16,height:"calc(100% - 22px)",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",background:"#F5EFE4"}}>
+              <p style={{fontSize:10,letterSpacing:3,textTransform:"uppercase",color:"#8a8070",opacity:0.6,marginBottom:8}}>Day Mode</p>
+              <p style={{fontFamily:"'Cormorant Garamond',serif",fontSize:18,fontWeight:300,color:"#2C2010",marginBottom:16}}>Today's Schedule</p>
+              {[["7:00 AM","Wake up"],["9:30 AM","Nap 1"],["1:00 PM","Nap 2"],["4:00 PM","Nap 3"],["7:30 PM","Bedtime"]].map(([time,label],i)=>(
+                <div key={i} style={{display:"flex",justifyContent:"space-between",width:"100%",padding:"8px 0",borderBottom:i<4?"1px solid rgba(44,32,16,0.08)":"none",fontSize:11,color:"#6B6560"}}><span style={{fontWeight:500,color:"#2C2010"}}>{time}</span><span>{label}</span></div>
+              ))}
+            </div>
+          </div>
+          {/* Night mode phone (center, larger) */}
+          <div style={{width:220,height:440,background:"#0D1117",borderRadius:28,border:"3px solid #2a2520",overflow:"hidden",position:"relative",transform:"scale(1.08)",boxShadow:"0 28px 80px rgba(0,0,0,0.25), 0 0 0 1px rgba(201,169,110,0.15)"}}>
+            <div style={{width:100,height:22,background:"#000",borderRadius:"0 0 14px 14px",margin:"0 auto",position:"relative",zIndex:2}}/>
+            <div style={{padding:16,height:"calc(100% - 22px)",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",background:"radial-gradient(ellipse at center, #1a1a2e, #0D1117)"}}>
+              <div style={{fontSize:32,marginBottom:8}}>🌙</div>
+              <p style={{fontSize:10,letterSpacing:3,textTransform:"uppercase",color:"#C9A96E",opacity:0.6,marginBottom:8}}>Night 3</p>
+              <p style={{fontFamily:"'Cormorant Garamond',serif",fontSize:18,fontWeight:300,color:"#EDE8DF",marginBottom:16}}>Luna is with you</p>
+              <div style={{background:"rgba(201,169,110,0.1)",border:"1px solid rgba(201,169,110,0.15)",borderRadius:12,padding:"10px 14px",fontSize:11,color:"#C9A96E",lineHeight:1.5,textAlign:"left",width:"100%",marginBottom:8}}>She's doing great. At this stage, 8 minutes of fussing is completely normal. Stay the course.</div>
+              <div style={{background:"rgba(255,255,255,0.05)",border:"1px solid rgba(255,255,255,0.08)",borderRadius:12,padding:"10px 14px",fontSize:11,color:"#8a8070",lineHeight:1.5,textAlign:"left",width:"100%",marginBottom:8,marginLeft:"20%"}}>She's been crying for 6 min. Should I go in?</div>
+              <div style={{background:"rgba(201,169,110,0.1)",border:"1px solid rgba(201,169,110,0.15)",borderRadius:12,padding:"10px 14px",fontSize:11,color:"#C9A96E",lineHeight:1.5,textAlign:"left",width:"100%"}}>Not yet. Your next check-in is at 10 minutes. You've got this. 💛</div>
+            </div>
+          </div>
+          {/* Nap phone */}
+          <div style={{width:220,height:440,background:"#0D1117",borderRadius:28,border:"3px solid #2a2520",overflow:"hidden",position:"relative",boxShadow:"0 24px 60px rgba(0,0,0,0.2), 0 0 0 1px rgba(201,169,110,0.1)"}}>
+            <div style={{width:100,height:22,background:"#000",borderRadius:"0 0 14px 14px",margin:"0 auto",position:"relative",zIndex:2}}/>
+            <div style={{padding:16,height:"calc(100% - 22px)",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",background:"radial-gradient(ellipse at center, #1a1a2e, #0D1117)"}}>
+              <p style={{fontSize:10,letterSpacing:3,textTransform:"uppercase",color:"#C9A96E",opacity:0.6,marginBottom:8}}>Nap Coaching</p>
+              <p style={{fontFamily:"'Cormorant Garamond',serif",fontSize:18,fontWeight:300,color:"#EDE8DF",marginBottom:16}}>Ask Luna anything</p>
+              <div style={{background:"rgba(255,255,255,0.05)",border:"1px solid rgba(255,255,255,0.08)",borderRadius:12,padding:"10px 14px",fontSize:11,color:"#8a8070",lineHeight:1.5,textAlign:"left",width:"100%",marginBottom:8,marginLeft:"20%"}}>His nap was only 32 min. Is that okay?</div>
+              <div style={{background:"rgba(201,169,110,0.1)",border:"1px solid rgba(201,169,110,0.15)",borderRadius:12,padding:"10px 14px",fontSize:11,color:"#C9A96E",lineHeight:1.5,textAlign:"left",width:"100%"}}>Short naps are really common during training. Anything over 30 min still counts. Night sleep improving is the first win — naps usually follow within a week.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* MEET LUNA QUOTE */}
+      <div style={{padding:"80px 24px",background:"#FAFAF8",textAlign:"center"}}>
+        <p style={{fontSize:11,letterSpacing:5,textTransform:"uppercase",color:"#C9A96E",marginBottom:16}}>Why Luna?</p>
+        <div style={{maxWidth:500,margin:"0 auto",padding:"40px 32px",background:"linear-gradient(135deg, #1a1f2e, #0D1117)",borderRadius:24,border:"1px solid rgba(201,169,110,0.1)"}}>
+          <div style={{fontSize:28,marginBottom:12}}>🌙</div>
+          <p style={{fontFamily:"'Cormorant Garamond',serif",fontStyle:"italic",fontSize:18,color:"#C9A96E",lineHeight:1.7,marginBottom:16}}>"It's 3am. Your baby's been crying for twelve minutes. You're sitting on the hallway floor wondering if you're doing this wrong. That's exactly the moment I was built for."</p>
+          <span style={{fontFamily:"'DM Sans',sans-serif",fontStyle:"normal",fontSize:12,color:"#6B6560",letterSpacing:3,textTransform:"uppercase"}}>— Luna</span>
+        </div>
+        <p style={{maxWidth:400,margin:"28px auto 0",fontSize:14,color:"#8a8070",lineHeight:1.7,textAlign:"center"}}>Not a search engine. Not a sleep article. Luna is a coach who knows your baby by name, what night you're on, and your chosen method — and she's right there with you through every nap, every bedtime, and every 3am wake-up.</p>
+      </div>
+
+      {/* FOOTER CTA */}
+      <div style={{padding:"100px 24px",textAlign:"center",background:"linear-gradient(180deg, #FAFAF8, #F0EBE0)"}}>
+        <h2 style={{fontFamily:"'Cormorant Garamond',serif",fontSize:42,fontWeight:300,color:"#2C2010",marginBottom:12}}>Rest begins here.</h2>
+        <p style={{fontFamily:"'Cormorant Garamond',serif",fontStyle:"italic",fontSize:18,color:"#C9A96E",marginBottom:36}}>You don't have to figure this out alone.</p>
+        <button onClick={()=>{setAuthMode("signup");setSc(S.AUTH);}} style={{display:"inline-block",padding:"16px 48px",background:"#1a1f2e",color:"#E8C98A",border:"none",borderRadius:14,fontSize:16,fontWeight:600,fontFamily:"'DM Sans',sans-serif",letterSpacing:0.5,cursor:"pointer",boxShadow:"0 4px 24px rgba(0,0,0,0.15)",transition:"all 0.3s ease"}}>Try Nuette</button>
+        <div style={{marginTop:60,display:"flex",gap:24,justifyContent:"center",flexWrap:"wrap"}}>
+          <a href="#" style={{color:"#8a8070",textDecoration:"none",fontSize:13}}>Terms of Service</a>
+          <a href="#" style={{color:"#8a8070",textDecoration:"none",fontSize:13}}>Privacy Policy</a>
+          <a href="mailto:hello@nuette.app" style={{color:"#8a8070",textDecoration:"none",fontSize:13}}>Contact</a>
+        </div>
+        <p style={{marginTop:24,fontSize:12,color:"#c4beb5"}}>© 2026 Nuette. All rights reserved.</p>
+      </div>
+
+      <style>{`@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}@keyframes pulse{0%,100%{opacity:0.3}50%{opacity:0.8}}@media(max-width:600px){.landing-hero-title{font-size:48px!important}}`}</style>
+    </div>}
+
     {sc===S.AUTH&&<div style={{minHeight:"100vh",background:"linear-gradient(135deg,#0D1117,#1a1f2e)",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:20,fontFamily:"'DM Sans',sans-serif"}}>
       <div style={{width:"100%",maxWidth:360,textAlign:"center"}}>
         <CrescentMoon size={80} glow animate/>
         <h1 style={{fontFamily:"'Cormorant Garamond',serif",fontSize:42,color:"#EDE8DF",fontWeight:300,margin:"24px 0 4px",letterSpacing:1}}>Nuette</h1>
-        <p style={{color:"#C9A96E",fontSize:16,marginBottom:40,fontFamily:"'Cormorant Garamond',serif",fontStyle:"italic",fontWeight:300,letterSpacing:1}}>Your calm at 3am.</p>
+        <p style={{fontFamily:"'Cormorant Garamond',serif",fontStyle:"italic",color:"#C9A96E",fontSize:18,marginBottom:40,letterSpacing:0.5}}>Your calm at 3am.</p>
         <div style={{display:"flex",background:"rgba(255,255,255,0.06)",borderRadius:12,padding:3,marginBottom:28}}>
           <button onClick={()=>{setAuthMode("login");setAuthError("");}} style={{flex:1,padding:"10px 0",borderRadius:10,border:"none",cursor:"pointer",fontFamily:"'DM Sans',sans-serif",fontSize:14,fontWeight:500,background:authMode==="login"?"rgba(201,169,110,0.2)":"transparent",color:authMode==="login"?"#C9A96E":"#8a8070",transition:"all .2s"}}>Sign In</button>
           <button onClick={()=>{setAuthMode("signup");setAuthError("");}} style={{flex:1,padding:"10px 0",borderRadius:10,border:"none",cursor:"pointer",fontFamily:"'DM Sans',sans-serif",fontSize:14,fontWeight:500,background:authMode==="signup"?"rgba(201,169,110,0.2)":"transparent",color:authMode==="signup"?"#C9A96E":"#8a8070",transition:"all .2s"}}>Create Account</button>
@@ -619,7 +716,7 @@ export default function Home() {
           <CrescentMoon size={110} glow animate />
           <div style={{textAlign:"center",marginTop:24}}>
             <h1 style={{fontFamily:"'Cormorant Garamond',serif",fontSize:42,fontWeight:300,letterSpacing:6,color:"#EDE8DF",textTransform:"uppercase"}}>Nuette</h1>
-            <p style={{fontSize:13,color:"#6B6560",letterSpacing:3,textTransform:"uppercase",marginTop:8}}>sleep training</p>
+            <p style={{fontSize:13,color:"#6B6560",letterSpacing:3,textTransform:"uppercase",marginTop:8}}>your calm at 3am</p>
           </div>
         </div>
       )}
