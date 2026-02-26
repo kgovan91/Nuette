@@ -605,7 +605,6 @@ export default function Home() {
           <p style={{fontSize:15,color:"rgba(237,232,223,0.6)",lineHeight:1.7,marginBottom:40,maxWidth:400,marginLeft:"auto",marginRight:"auto"}}>Luna knows your baby, your method, and exactly what night you're on. She stays with you in real time — because no parent should sit alone on the hallway floor at 3am.</p>
           <button onClick={()=>{setAuthMode("signup");setSc(S.AUTH);}} style={{display:"inline-block",padding:"16px 48px",background:"linear-gradient(135deg,#C9A96E,#E8C98A)",color:"#0D1117",border:"none",borderRadius:14,fontSize:16,fontWeight:600,fontFamily:"'DM Sans',sans-serif",letterSpacing:0.5,cursor:"pointer",boxShadow:"0 4px 24px rgba(201,169,110,0.3)",transition:"all 0.3s ease"}}>Meet Luna</button>
         </div>
-        <div style={{position:"absolute",bottom:32,left:"50%",transform:"translateX(-50%)",color:"rgba(201,169,110,0.4)",fontSize:12,letterSpacing:3,textTransform:"uppercase",animation:"pulse 2s ease-in-out infinite"}}>Scroll</div>
       </div>
 
       {/* HOW IT WORKS */}
