@@ -13,10 +13,10 @@ const geistMono = localFont({
 });
 
 export const metadata = {
-  title: "Nuette",
+  title: "Nuette — Your calm at 3am.",
   description: "Your 24/7 Baby Sleep Coach",
   openGraph: {
-    title: "Nuette: Your 24/7 Baby Sleep Coach",
+    title: "Nuette — Your calm at 3am.",
     description: "Your 24/7 Baby Sleep Coach",
     url: "https://nuette.app",
     siteName: "Nuette",
@@ -24,7 +24,7 @@ export const metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Nuette: Your 24/7 Baby Sleep Coach",
+    title: "Nuette — Your calm at 3am.",
     description: "Your 24/7 Baby Sleep Coach",
   },
 };
