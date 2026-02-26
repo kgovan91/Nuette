@@ -6,7 +6,7 @@ export async function POST(req) {
   try {
     const { messages, context, babyName, age, method, nightNumber } = await req.json();
     const n = babyName || "your baby";
-    const systemPrompt = `You are Luna, a warm, expert AI baby sleep consultant inside the Dreamwell app.
+    const systemPrompt = `You are Luna, a warm, expert AI baby sleep consultant inside the Nuette app.
 
 FAMILY CONTEXT:
 - Baby's name: ${n}

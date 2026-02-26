@@ -189,6 +189,7 @@ export default function Home() {
   const[resetConfirm,setResetConfirm]=useState(false);
   const[changingMethod,setChangingMethod]=useState(false);
   const[showSignOut,setShowSignOut]=useState(false);
+  const[showProfileMenu,setShowProfileMenu]=useState(false);
   const[logModal,setLogModal]=useState(null);
   const[lmRating,setLmRating]=useState(null);
   const[lmWups,setLmWups]=useState(null);
@@ -496,15 +497,31 @@ export default function Home() {
     </div>
   );
 
+  const supportSubject=encodeURIComponent(`Nuette Support — ${name||"Baby"}, Night ${nn||1}`);
+  const supportEmail=`mailto:support@nuette.app?subject=${supportSubject}`;
+
   const ProfileBtn=()=>user&&(sc===S.HOME||sc===S.CHAT||sc===S.NAP||sc===S.PLAN||sc===S.LOG||sc===S.NIGHT)?(
     <>
-      <button onClick={()=>setShowSignOut(true)} style={{position:"fixed",top:12,right:12,zIndex:200,width:36,height:36,borderRadius:"50%",background:"rgba(201,169,110,0.15)",border:"1px solid rgba(201,169,110,0.2)",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",color:"#C9A96E",fontSize:14,fontFamily:"'DM Sans',sans-serif"}} title="Sign out">{user.email?user.email[0].toUpperCase():"U"}</button>
+      <button onClick={()=>setShowProfileMenu(!showProfileMenu)} style={{position:"fixed",top:12,right:12,zIndex:200,width:36,height:36,borderRadius:"50%",background:"rgba(201,169,110,0.15)",border:"1px solid rgba(201,169,110,0.2)",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",color:"#C9A96E",fontSize:14,fontFamily:"'DM Sans',sans-serif"}} title="Menu">{user.email?user.email[0].toUpperCase():"U"}</button>
+      {showProfileMenu&&(
+        <div onClick={()=>setShowProfileMenu(false)} style={{position:"fixed",top:0,left:0,right:0,bottom:0,zIndex:250}}>
+          <div onClick={e=>e.stopPropagation()} style={{position:"fixed",top:56,right:12,zIndex:260,background:isDayMode?"#F5EFE4":"#1a1f2e",border:isDayMode?"1px solid rgba(201,169,110,0.3)":"1px solid rgba(201,169,110,0.15)",borderRadius:14,padding:"6px",minWidth:160,boxShadow:"0 8px 32px rgba(0,0,0,0.3)"}}>
+            <a href={supportEmail} onClick={()=>setShowProfileMenu(false)} style={{display:"flex",alignItems:"center",gap:10,padding:"12px 14px",borderRadius:10,textDecoration:"none",color:isDayMode?"#2C2010":"#EDE8DF",fontSize:14,fontFamily:"'DM Sans',sans-serif",fontWeight:400,cursor:"pointer",transition:"background .15s"}} onMouseEnter={e=>e.currentTarget.style.background=isDayMode?"rgba(201,169,110,0.1)":"rgba(255,255,255,0.05)"} onMouseLeave={e=>e.currentTarget.style.background="transparent"}>
+              <span style={{fontSize:16}}>✉</span> Support
+            </a>
+            <div style={{height:1,background:isDayMode?"rgba(201,169,110,0.15)":"rgba(255,255,255,0.06)",margin:"2px 10px"}}/>
+            <button onClick={()=>{setShowProfileMenu(false);setShowSignOut(true);}} style={{display:"flex",alignItems:"center",gap:10,padding:"12px 14px",borderRadius:10,background:"none",border:"none",color:isDayMode?"#2C2010":"#EDE8DF",fontSize:14,fontFamily:"'DM Sans',sans-serif",fontWeight:400,cursor:"pointer",width:"100%",transition:"background .15s"}} onMouseEnter={e=>e.currentTarget.style.background=isDayMode?"rgba(201,169,110,0.1)":"rgba(255,255,255,0.05)"} onMouseLeave={e=>e.currentTarget.style.background="transparent"}>
+              <span style={{fontSize:16}}>↩</span> Sign Out
+            </button>
+          </div>
+        </div>
+      )}
       {showSignOut&&(
         <div onClick={()=>setShowSignOut(false)} style={{position:"fixed",top:0,left:0,right:0,bottom:0,background:"rgba(0,0,0,0.6)",backdropFilter:"blur(6px)",zIndex:300,display:"flex",alignItems:"center",justifyContent:"center"}}>
           <div onClick={e=>e.stopPropagation()} style={{background:isDayMode?"#F5EFE4":"#161B22",border:isDayMode?"1px solid rgba(201,169,110,0.3)":"1px solid rgba(201,169,110,0.15)",borderRadius:20,padding:"28px 24px",width:"85%",maxWidth:320,textAlign:"center"}}>
             <div style={{fontSize:36,marginBottom:12}}>🌙</div>
             <h3 style={{fontFamily:"'Cormorant Garamond',serif",fontSize:22,fontWeight:300,color:isDayMode?"#2C2010":"#EDE8DF",marginBottom:8}}>Sign out?</h3>
-            <p style={{fontSize:13,color:isDayMode?"#6B6560":"#6B6560",lineHeight:1.6,marginBottom:24}}>Are you sure you want to sign out of Dreamwell?</p>
+            <p style={{fontSize:13,color:isDayMode?"#6B6560":"#6B6560",lineHeight:1.6,marginBottom:24}}>Are you sure you want to sign out of Nuette?</p>
             <div style={{display:"flex",gap:10}}>
               <button onClick={()=>setShowSignOut(false)} style={{flex:1,padding:"12px 0",borderRadius:12,background:"none",border:isDayMode?"1px solid rgba(201,169,110,0.3)":"1px solid rgba(255,255,255,0.1)",color:isDayMode?"#2C2010":"#EDE8DF",fontSize:14,fontFamily:"'DM Sans',sans-serif",cursor:"pointer",fontWeight:500}}>Cancel</button>
               <button onClick={()=>{setShowSignOut(false);handleSignOut();}} style={{flex:1,padding:"12px 0",borderRadius:12,background:"rgba(201,169,110,0.15)",border:"1px solid rgba(201,169,110,0.3)",color:"#C9A96E",fontSize:14,fontFamily:"'DM Sans',sans-serif",cursor:"pointer",fontWeight:500}}>Sign Out</button>
@@ -584,8 +601,8 @@ export default function Home() {
     {sc===S.AUTH&&<div style={{minHeight:"100vh",background:"linear-gradient(135deg,#0D1117,#1a1f2e)",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:20,fontFamily:"'DM Sans',sans-serif"}}>
       <div style={{width:"100%",maxWidth:360,textAlign:"center"}}>
         <CrescentMoon size={80} glow animate/>
-        <h1 style={{fontFamily:"'Cormorant Garamond',serif",fontSize:42,color:"#EDE8DF",fontWeight:300,margin:"24px 0 4px",letterSpacing:1}}>Dreamwell</h1>
-        <p style={{color:"#C9A96E",fontSize:14,marginBottom:40,letterSpacing:0.5}}>Your 24/7 Baby Sleep Coach</p>
+        <h1 style={{fontFamily:"'Cormorant Garamond',serif",fontSize:42,color:"#EDE8DF",fontWeight:300,margin:"24px 0 4px",letterSpacing:1}}>Nuette</h1>
+        <p style={{color:"#C9A96E",fontSize:14,marginBottom:40,letterSpacing:0.5}}>Your calm at 3am</p>
         <div style={{display:"flex",background:"rgba(255,255,255,0.06)",borderRadius:12,padding:3,marginBottom:28}}>
           <button onClick={()=>{setAuthMode("login");setAuthError("");}} style={{flex:1,padding:"10px 0",borderRadius:10,border:"none",cursor:"pointer",fontFamily:"'DM Sans',sans-serif",fontSize:14,fontWeight:500,background:authMode==="login"?"rgba(201,169,110,0.2)":"transparent",color:authMode==="login"?"#C9A96E":"#8a8070",transition:"all .2s"}}>Sign In</button>
           <button onClick={()=>{setAuthMode("signup");setAuthError("");}} style={{flex:1,padding:"10px 0",borderRadius:10,border:"none",cursor:"pointer",fontFamily:"'DM Sans',sans-serif",fontSize:14,fontWeight:500,background:authMode==="signup"?"rgba(201,169,110,0.2)":"transparent",color:authMode==="signup"?"#C9A96E":"#8a8070",transition:"all .2s"}}>Create Account</button>
@@ -601,7 +618,7 @@ export default function Home() {
         <div style={{minHeight:"100vh",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",background:"radial-gradient(ellipse at center,#1a1a2e 0%,#0D1117 70%)",animation:"fadeIn .8s ease"}}>
           <CrescentMoon size={110} glow animate />
           <div style={{textAlign:"center",marginTop:24}}>
-            <h1 style={{fontFamily:"'Cormorant Garamond',serif",fontSize:42,fontWeight:300,letterSpacing:6,color:"#EDE8DF",textTransform:"uppercase"}}>Dreamwell</h1>
+            <h1 style={{fontFamily:"'Cormorant Garamond',serif",fontSize:42,fontWeight:300,letterSpacing:6,color:"#EDE8DF",textTransform:"uppercase"}}>Nuette</h1>
             <p style={{fontSize:13,color:"#6B6560",letterSpacing:3,textTransform:"uppercase",marginTop:8}}>sleep training</p>
           </div>
         </div>
@@ -1005,7 +1022,7 @@ export default function Home() {
             <CrescentMoon size={120} glow={false} />
           </div>
           <div style={{textAlign:"center",position:"relative",zIndex:10}}>
-            <p style={{fontSize:12,letterSpacing:3,textTransform:"uppercase",color:"#4A4640",marginBottom:16,opacity:as2>=1?1:0,transition:"opacity .8s ease .3s"}}>Dreamwell</p>
+            <p style={{fontSize:12,letterSpacing:3,textTransform:"uppercase",color:"#4A4640",marginBottom:16,opacity:as2>=1?1:0,transition:"opacity .8s ease .3s"}}>Nuette</p>
             <h2 style={{fontFamily:"'Cormorant Garamond',serif",fontSize:34,fontWeight:300,color:"#C9A96E",opacity:as2>=1?1:0,transition:"opacity .8s ease .5s",marginBottom:16}}>Luna Night Mode</h2>
             <div style={{fontSize:14,color:"#6B6560",opacity:as2>=2?1:0,transition:"opacity .8s ease",marginBottom:8}}>Activating...</div>
             <div style={{display:"flex",justifyContent:"center",gap:8,opacity:as2>=2?1:0,transition:"opacity .6s ease .2s",marginBottom:24}}>
