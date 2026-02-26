@@ -189,6 +189,7 @@ export default function Home() {
   const[resetConfirm,setResetConfirm]=useState(false);
   const[changingMethod,setChangingMethod]=useState(false);
   const[showSignOut,setShowSignOut]=useState(false);
+  const[showMenu,setShowMenu]=useState(false);
   const[logModal,setLogModal]=useState(null);
   const[lmRating,setLmRating]=useState(null);
   const[lmWups,setLmWups]=useState(null);
@@ -498,7 +499,17 @@ export default function Home() {
 
   const ProfileBtn=()=>user&&(sc===S.HOME||sc===S.CHAT||sc===S.NAP||sc===S.PLAN||sc===S.LOG||sc===S.NIGHT)?(
     <>
-      <button onClick={()=>setShowSignOut(true)} style={{position:"fixed",top:12,right:12,zIndex:200,width:36,height:36,borderRadius:"50%",background:"rgba(201,169,110,0.15)",border:"1px solid rgba(201,169,110,0.2)",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",color:"#C9A96E",fontSize:14,fontFamily:"'DM Sans',sans-serif"}} title="Sign out">{user.email?user.email[0].toUpperCase():"U"}</button>
+      <button onClick={()=>setShowMenu(!showMenu)} style={{position:"fixed",top:12,right:12,zIndex:200,width:36,height:36,borderRadius:"50%",background:"rgba(201,169,110,0.15)",border:"1px solid rgba(201,169,110,0.2)",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",color:"#C9A96E",fontSize:14,fontFamily:"'DM Sans',sans-serif"}} title="Menu">{user.email?user.email[0].toUpperCase():"U"}</button>
+      {showMenu&&(
+        <div onClick={()=>setShowMenu(false)} style={{position:"fixed",top:0,left:0,right:0,bottom:0,zIndex:250}}>
+          <div onClick={e=>e.stopPropagation()} style={{position:"fixed",top:54,right:12,zIndex:260,background:isDayMode?"#F5EFE4":"#161B22",border:isDayMode?"1px solid rgba(201,169,110,0.3)":"1px solid rgba(201,169,110,0.15)",borderRadius:14,padding:"6px",minWidth:180,boxShadow:"0 8px 32px rgba(0,0,0,0.25)"}}>
+            <a href={`mailto:support@nuette.app?subject=Nuette Support — ${name||"User"}, Night ${nn||1}`} onClick={()=>setShowMenu(false)} style={{display:"block",padding:"12px 16px",borderRadius:10,fontSize:14,color:isDayMode?"#2C2010":"#EDE8DF",textDecoration:"none",fontFamily:"'DM Sans',sans-serif",transition:"background .2s"}}>Support</a>
+            <a href="mailto:hello@nuette.app" onClick={()=>setShowMenu(false)} style={{display:"block",padding:"12px 16px",borderRadius:10,fontSize:14,color:isDayMode?"#2C2010":"#EDE8DF",textDecoration:"none",fontFamily:"'DM Sans',sans-serif",transition:"background .2s"}}>Contact Us</a>
+            <div style={{height:1,margin:"4px 8px",background:isDayMode?"rgba(201,169,110,0.15)":"rgba(255,255,255,0.08)"}}/>
+            <button onClick={()=>{setShowMenu(false);setShowSignOut(true);}} style={{display:"block",width:"100%",padding:"12px 16px",borderRadius:10,fontSize:14,color:"#C9A96E",background:"none",border:"none",textAlign:"left",fontFamily:"'DM Sans',sans-serif",cursor:"pointer",transition:"background .2s"}}>Sign Out</button>
+          </div>
+        </div>
+      )}
       {showSignOut&&(
         <div onClick={()=>setShowSignOut(false)} style={{position:"fixed",top:0,left:0,right:0,bottom:0,background:"rgba(0,0,0,0.6)",backdropFilter:"blur(6px)",zIndex:300,display:"flex",alignItems:"center",justifyContent:"center"}}>
           <div onClick={e=>e.stopPropagation()} style={{background:isDayMode?"#F5EFE4":"#161B22",border:isDayMode?"1px solid rgba(201,169,110,0.3)":"1px solid rgba(201,169,110,0.15)",borderRadius:20,padding:"28px 24px",width:"85%",maxWidth:320,textAlign:"center"}}>
