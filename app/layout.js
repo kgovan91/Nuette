@@ -15,6 +15,10 @@ const geistMono = localFont({
 export const metadata = {
   title: "Nuette",
   description: "Your 24/7 Baby Sleep Coach",
+  icons: {
+    icon: "/favicon.ico",
+    apple: "/apple-touch-icon.png",
+  },
   openGraph: {
     title: "Nuette: Your 24/7 Baby Sleep Coach",
     description: "Your 24/7 Baby Sleep Coach",

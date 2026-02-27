@@ -482,7 +482,7 @@ export default function Home() {
   const sendNight=()=>send(setNmsgs,"night");
   const sendNap=()=>send(setNapmsg,"nap");
 
-  const initDay=()=>{if(dmsgs.length===0){const greeting="Hi, I'm Luna — your personal sleep expert, available 24/7. I'm here for every question, every 2am moment, and every win. How can I help today?";setDmsgs([{role:"a",text:greeting}]);if(user){supabase.from('chat_messages').insert({user_id:user.id,chat_type:"day",night_number:nn,role:"a",content:greeting}).then(r=>console.log("Day greeting saved"));}}};
+  const initDay=()=>{if(dmsgs.length===0){const greeting="Hi, I'm Luna — your personal sleep expert, available 24/7. I'm here for every question, every 3am moment, and every win. How can I help today?";setDmsgs([{role:"a",text:greeting}]);if(user){supabase.from('chat_messages').insert({user_id:user.id,chat_type:"day",night_number:nn,role:"a",content:greeting}).then(r=>console.log("Day greeting saved"));}}};
 
   const Nav=()=>(
     <div style={{position:"fixed",bottom:0,left:"50%",transform:"translateX(-50%)",width:"100%",maxWidth:390,background:isDayMode?"rgba(240,233,220,0.97)":"rgba(13,17,23,0.96)",backdropFilter:"blur(20px)",borderTop:isDayMode?"1px solid rgba(212,197,168,0.6)":"1px solid rgba(255,255,255,0.06)",display:"flex",justifyContent:"space-around",padding:"8px 0 20px",zIndex:100}}>
@@ -737,7 +737,7 @@ export default function Home() {
           <div>
             <div className="f1" style={{marginBottom:44}}><CrescentMoon size={72} glow animate /></div>
             <h1 className="f2" style={{fontFamily:"'Cormorant Garamond',serif",fontSize:44,fontWeight:300,lineHeight:1.15,marginBottom:20}}>Peaceful nights<br /><em style={{color:"#C9A96E"}}>are possible.</em></h1>
-            <p className="f3" style={{fontSize:15,color:"#8B8680",lineHeight:1.7,maxWidth:300}}>Science-backed sleep training with an expert available to guide you through every moment — especially the hard ones at 2am.</p>
+            <p className="f3" style={{fontSize:15,color:"#8B8680",lineHeight:1.7,maxWidth:300}}>Science-backed sleep training with an expert available to guide you through every moment — especially the hard ones at 3am.</p>
           </div>
           <div className="f4">
             <div style={{display:"flex",gap:8,marginBottom:16}}>{[0,1,2].map(i=><div key={i} style={{height:2,flex:1,borderRadius:1,background:i===0?"#C9A96E":"rgba(255,255,255,0.1)"}} />)}</div>
